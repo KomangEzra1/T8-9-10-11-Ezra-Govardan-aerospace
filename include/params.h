@@ -6,11 +6,12 @@
 #define COMPILED __DATE__ " " __TIME__
 #define CURRENT_FIRMWARE_TITLE "Govardan"
 #define CURRENT_FIRMWARE_VERSION "0.0.1"
-#define NIM 110010129
-#define NAMA_LENGKAP "I Wayan Aditya Suranata"
-#define NAMA_KELOMPOK "Paprika"
+#define NIM 42330050
+#define NAMA_LENGKAP "I komang Ezra Lesmana"
+#define NAMA_KELOMPOK "AeroSpace"
 
 #define USE_WIFI_OTA
+
 
 #define USE_LOCAL_WEB_INTERFACE
 #ifdef USE_LOCAL_WEB_INTERFACE
@@ -21,7 +22,7 @@
 #define USE_IOT
 #ifdef USE_IOT
     #define THINGSBOARD_ENABLE_STREAM_UTILS true
-    #define USE_IOT_SECURE
+   //  #define USE_IOT_SECURE 
     #define USE_IOT_OTA
     const uint8_t IOT_FIRMWARE_FAILURE_RETRIES = 10;
     const uint16_t IOT_FIRMWARE_PACKET_SIZE = 4096;
@@ -30,7 +31,7 @@
     #define IOT_DEFAULT_MAX_STACK_SIZE 2048UL
     #define IOT_STACKSIZE_TB 2048UL
     #define IOT_MAX_ATTRIBUTES 10
-    #ifdef USE_IOT_SECURE
+    #ifdef USE_IOT_SECURE 
     #define IOT_STACKSIZE 9000UL
     #else
     #define IOT_STACKSIZE_TB 6000UL
@@ -60,13 +61,13 @@
 
 #define MAX_CRASH_COUNTER 3
 
-#ifdef USE_IOT_SECURE
+#ifdef USE_IOT_SECURE  
 static const int tbPort = 8883;
-static constexpr char tbAddr[] PROGMEM = "prita.undiknas.ac.id";
+static constexpr char tbAddr[] PROGMEM = "broker.hivemq.com";
 static constexpr char binURL[] PROGMEM = "https://udawa.or.id/cdn/firmware/gadadar4ch.bin";
 #else
 static const int tbPort = 1883;
-static constexpr char tbAddr[] PROGMEM = "udawa.local";
+static constexpr char tbAddr[] PROGMEM = "broker.hivemq.com";
 static constexpr char binURL[] PROGMEM = "http://udawa.or.id/cdn/firmware/gadadar4ch.bin";
 #endif
 static constexpr char model[] PROGMEM = "Gadadar4Ch";

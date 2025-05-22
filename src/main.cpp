@@ -1,17 +1,19 @@
 #include <main.h>
 
+
 void setup() {
   // tulis setup kode mu di sini, untuk dijalankan sekali saja:
   urusanLED.setWarna(100, 0, 0);
-  
+ 
   Wire.begin();
   Serial.begin(SERIAL_BAUD_RATE);
   i2cScanner();
-  
+ 
   oled.mulai();
   oled.bersihkan();
-  
-  cetakIdentitasDeveloper(); 
+ 
+  cetakIdentitasDeveloper();
+
 
   urusanWiFi.konek();
   while(urusanWiFi.apakahKonek() == 0){
@@ -19,14 +21,42 @@ void setup() {
     delay(1000);
   }
   urusanLED.setWarna(0, 100, 0);
-  buzzer.beep(50, 3); 
+  buzzer.beep(50, 3);
   buzzer.beep(100, 2);
+
+
+  // Start MQTT
+  urusanIoT.konek();
+  urusanIoT.penangkapPesan(penangkapPesan);
+
+
+  if(urusanIoT.apakahKonek() == 1){
+    subscribe();
+  }
 }
 
+
+unsigned long lastSent = 0;
 void loop() {
   // tulis kode utama mu di sini, untuk dijalankan berulang-ulang :
-  
+  urusanIoT.proses();
+
+
+  if (millis() - lastSent > 1000) {
+    String pesan = String(NAMA_LENGKAP) + " - " + String(NIM) + " - " + String("HADIR");
+    urusanIoT.publish("undiknas/psti/display/update", pesan);
+    lastSent = millis();
+  }
 }
+
+
+void penangkapPesan(String topic, String message){
+  Serial.printf("penangkapPesan: topic: %s | message: %s\r\n", topic.c_str(), message.c_str());
+  oled.bersihkan();
+  oled.tambahTeks(0, 0, "%s", message.c_str());  
+  oled.tampilkan();
+}
+
 
 // tulis definisi fungsi mu di sini:
 void cetakIdentitasDeveloper() {
@@ -40,11 +70,20 @@ void cetakIdentitasDeveloper() {
   oled.tampilkan();
 }
 
+
+void subscribe() {
+  urusanIoT.subscribe("undiknas/psti/display");
+  urusanIoT.subscribe("undiknas/psti/display/update");
+}
+
+
 void i2cScanner() {
   byte error, address;
   int nDevices;
 
+
   Serial.println("Scanning...");
+
 
   nDevices = 0;
   for(address = 1; address < 127; address++ ) {
