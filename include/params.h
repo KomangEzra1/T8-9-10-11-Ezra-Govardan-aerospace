@@ -8,7 +8,7 @@
 #define CURRENT_FIRMWARE_VERSION "0.0.1"
 #define NIM 42330050
 #define NAMA_LENGKAP "I komang Ezra Lesmana"
-#define NAMA_KELOMPOK "AeroSpace"
+#define NAMA_KELOMPOK "Aerospace"
 
 #define USE_WIFI_OTA
 
@@ -67,7 +67,7 @@ static constexpr char tbAddr[] PROGMEM = "broker.hivemq.com";
 static constexpr char binURL[] PROGMEM = "https://udawa.or.id/cdn/firmware/gadadar4ch.bin";
 #else
 static const int tbPort = 1883;
-static constexpr char tbAddr[] PROGMEM = "broker.hivemq.com";
+static constexpr char tbAddr[] PROGMEM = "198.162.8.2";
 static constexpr char binURL[] PROGMEM = "http://udawa.or.id/cdn/firmware/gadadar4ch.bin";
 #endif
 static constexpr char model[] PROGMEM = "Gadadar4Ch";

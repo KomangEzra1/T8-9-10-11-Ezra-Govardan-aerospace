@@ -4,6 +4,8 @@
 
 #include <WiFi.h>
 #include <MQTT.h>
+
+
 class UrusanIoT {
     public:
         UrusanIoT(const char* _broker, int _port, const char* _clientId,
@@ -28,5 +30,3 @@ class UrusanIoT {
 
 
 #endif
-// UrusanIoT.h
-// This file is part of UrusanIoT.
