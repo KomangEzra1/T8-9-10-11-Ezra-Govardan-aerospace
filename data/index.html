@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dasbor Agen Govardan</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Updated Paho MQTT Client Library Path -->
+    <script src="https://psti.undiknas.ac.id/demo/mqttws31.js" type="text/javascript"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom styles for toggle switch */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #4ade80; /* green-400 */
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #4ade80; /* green-400 */
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200">
+
+
+    <!-- Login Page -->
+    <div id="login-page" class="flex items-center justify-center min-h-screen">
+        <div class="w-full max-w-md p-8 space-y-6 bg-gray-800 rounded-lg shadow-lg">
+            <div class="text-center">
+                <img src="https://placehold.co/100x100/7c3aed/ffffff?text=UDAWA" alt="Logo UDAWA Gadadar" class="w-24 h-24 mx-auto rounded-full mb-4">
+                <h1 class="text-2xl font-bold text-white">Login Agen Govardan</h1>
+                <p class="text-gray-400">Masukkan kredensial MQTT untuk melanjutkan</p>
+            </div>
+            <form id="login-form" class="space-y-6">
+                <div>
+                    <label for="username" class="text-sm font-medium text-gray-400">Username</label>
+                    <input type="text" id="username" name="username" required
+                        class="w-full px-4 py-2 mt-2 text-white bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                </div>
+                <div>
+                    <label for="password" class="text-sm font-medium text-gray-400">Password</label>
+                    <input type="password" id="password" name="password" required
+                        class="w-full px-4 py-2 mt-2 text-white bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                </div>
+                <button type="submit"
+                    class="w-full py-2 font-semibold text-white bg-purple-600 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-purple-500 transition-colors">
+                    Hubungkan
+                </button>
+            </form>
+            <div id="login-status" class="text-center text-sm text-yellow-400"></div>
+        </div>
+    </div>
+
+
+    <!-- Main Application (Dashboard) -->
+    <div id="app" class="hidden">
+        <div class="flex h-screen bg-gray-900">
+            <!-- Sidebar -->
+            <aside id="sidebar" class="w-64 bg-gray-800 text-gray-200 flex-shrink-0 transition-all duration-300 ease-in-out -translate-x-full md:translate-x-0">
+                <div class="p-4 flex items-center space-x-2 border-b border-gray-700">
+                     <img src="https://placehold.co/40x40/7c3aed/ffffff?text=UG" alt="Logo" class="w-10 h-10 rounded-full">
+                    <span class="text-xl font-bold">UDAWA Govardan</span>
+                </div>
+                <nav class="mt-4">
+                    <a href="#" id="nav-monitoring" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700 bg-gray-700">
+                        <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2a4 4 0 00-4-4H3a4 4 0 00-4 4v2m12 0v-2a4 4 0 00-4-4h-2a4 4 0 00-4 4v2m16-10l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                        Monitoring
+                    </a>
+                    <a href="#" id="nav-kontrol" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700">
+                       <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        Kontrol
+                    </a>
+                    <a href="#" id="nav-about" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700">
+                        <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        About
+                    </a>
+                </nav>
+            </aside>
+
+
+            <!-- Main Content -->
+            <div class="flex-1 flex flex-col overflow-hidden">
+                <header class="flex items-center justify-between p-4 bg-gray-800 border-b border-gray-700">
+                    <button id="menu-toggle" class="text-gray-300 focus:outline-none md:hidden">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                    </button>
+                    <div class="flex-1 text-center text-lg font-semibold">Dasbor UDAWA</div>
+                    <div class="flex items-center space-x-2">
+                         <span id="connection-status-dot" class="w-3 h-3 bg-yellow-500 rounded-full"></span>
+                         <span id="connection-status-text">Menghubungkan...</span>
+                    </div>
+                </header>
+               
+                <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-900 p-4 md:p-6 lg:p-8">
+                    <!-- Monitoring Page Content -->
+                    <div id="monitoring-page">
+                        <h2 class="text-2xl font-bold mb-6">Monitoring Sensor</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            <div class="bg-gray-800 p-5 rounded-lg shadow-lg"><h3 class="font-semibold text-gray-400">Intensitas Cahaya (Lux)</h3><p id="lux-value" class="text-3xl font-bold text-yellow-400">---</p><p class="text-xs text-gray-500">Dari agen Sudarsan</p></div>
+                            <div class="bg-gray-800 p-5 rounded-lg shadow-lg"><h3 class="font-semibold text-gray-400">Temperatur</h3><p id="temp-value" class="text-3xl font-bold text-red-400">--- °C</p><p class="text-xs text-gray-500">Dari agen Murari</p></div>
+                            <div class="bg-gray-800 p-5 rounded-lg shadow-lg"><h3 class="font-semibold text-gray-400">Kelembapan</h3><p id="humid-value" class="text-3xl font-bold text-blue-400">--- %</p><p class="text-xs text-gray-500">Dari agen Murari</p></div>
+                            <div class="bg-gray-800 p-5 rounded-lg shadow-lg"><h3 class="font-semibold text-gray-400">Level Tangki</h3><p id="tank-level-value" class="text-3xl font-bold text-cyan-400">--- %</p><p id="tank-distance-value" class="text-sm text-gray-500">Jarak: --- cm</p><p class="text-xs text-gray-500">Dari agen Damodar</p></div>
+                            <div class="bg-gray-800 p-5 rounded-lg shadow-lg"><h3 class="font-semibold text-gray-400">Kecepatan Blower</h3><p id="blower-speed-value" class="text-3xl font-bold text-green-400">---</p><p class="text-xs text-gray-500">Dari agen Gadadar</p></div>
+                            <div class="bg-gray-800 p-5 rounded-lg shadow-lg"><h3 class="font-semibold text-gray-400">Arah Blower</h3><p id="blower-direction-value" class="text-3xl font-bold text-green-400">---</p><p class="text-xs text-gray-500">Dari agen Gadadar</p></div>
+                            <div class="bg-gray-800 p-5 rounded-lg shadow-lg"><h3 class="font-semibold text-gray-400">Status Blower</h3><p id="blower-state-value" class="text-3xl font-bold text-green-400">---</p><p class="text-xs text-gray-500">Dari agen Gadadar</p></div>
+                        </div>
+                    </div>
+
+
+                    <!-- Kontrol Page Content -->
+                    <div id="kontrol-page" class="hidden">
+                        <div class="space-y-8">
+                            <div>
+                                <h2 class="text-2xl font-bold mb-6">Kontrol Relay</h2>
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                    <div class="bg-gray-800 p-5 rounded-lg shadow-lg flex items-center justify-between"><h3 class="text-lg font-semibold">Relay 1</h3><div class="relative inline-block w-14 mr-2 align-middle select-none transition duration-200 ease-in"><input type="checkbox" name="toggle" id="relay-1-switch" class="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 appearance-none cursor-pointer"/><label for="relay-1-switch" class="toggle-label block overflow-hidden h-7 rounded-full bg-gray-600 cursor-pointer"></label></div></div>
+                                    <div class="bg-gray-800 p-5 rounded-lg shadow-lg flex items-center justify-between"><h3 class="text-lg font-semibold">Relay 2</h3><div class="relative inline-block w-14 mr-2 align-middle select-none transition duration-200 ease-in"><input type="checkbox" name="toggle" id="relay-2-switch" class="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 appearance-none cursor-pointer"/><label for="relay-2-switch" class="toggle-label block overflow-hidden h-7 rounded-full bg-gray-600 cursor-pointer"></label></div></div>
+                                    <div class="bg-gray-800 p-5 rounded-lg shadow-lg flex items-center justify-between"><h3 class="text-lg font-semibold">Relay 3</h3><div class="relative inline-block w-14 mr-2 align-middle select-none transition duration-200 ease-in"><input type="checkbox" name="toggle" id="relay-3-switch" class="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 appearance-none cursor-pointer"/><label for="relay-3-switch" class="toggle-label block overflow-hidden h-7 rounded-full bg-gray-600 cursor-pointer"></label></div></div>
+                                    <div class="bg-gray-800 p-5 rounded-lg shadow-lg flex items-center justify-between"><h3 class="text-lg font-semibold">Relay 4</h3><div class="relative inline-block w-14 mr-2 align-middle select-none transition duration-200 ease-in"><input type="checkbox" name="toggle" id="relay-4-switch" class="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 appearance-none cursor-pointer"/><label for="relay-4-switch" class="toggle-label block overflow-hidden h-7 rounded-full bg-gray-600 cursor-pointer"></label></div></div>
+                                </div>
+                            </div>
+                            <div>
+                                <h2 class="text-2xl font-bold mb-6">Kontrol Blower</h2>
+                                <div class="p-6 bg-gray-800 rounded-lg shadow-lg space-y-6">
+                                    <div class="flex items-center justify-between">
+                                        <label for="blower-speed-slider" class="font-semibold">Kecepatan:</label>
+                                        <input type="range" id="blower-speed-slider" min="0" max="100" value="50" class="w-1/2">
+                                        <span id="blower-speed-label" class="font-bold w-12 text-center">50</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-semibold">Arah:</span>
+                                        <div class="flex items-center space-x-4">
+                                            <label><input type="radio" name="blower-direction" value="0" class="mr-1"> Sedot</label>
+                                            <label><input type="radio" name="blower-direction" value="1" checked class="mr-1"> Semprot</label>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-semibold">State:</span>
+                                        <div class="relative inline-block w-14 mr-2 align-middle select-none transition duration-200 ease-in">
+                                            <input type="checkbox" name="toggle" id="blower-state-switch" class="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                                            <label for="blower-state-switch" class="toggle-label block overflow-hidden h-7 rounded-full bg-gray-600 cursor-pointer"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- About Page Content -->
+                    <div id="about-page" class="hidden">
+                        <h2 class="text-2xl font-bold mb-6">Tentang Tim Pengembang</h2>
+                        <div class="bg-gray-800 p-6 rounded-lg shadow-lg overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead class="border-b border-gray-600">
+                                    <tr>
+                                        <th class="p-3">NIM</th>
+                                        <th class="p-3">Nama Lengkap</th>
+                                        <th class="p-3">Agen yang Dibuat</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="team-data">
+                                    <!-- Data tim akan diisi oleh JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+
+                </main>
+            </div>
+        </div>
+    </div>
+
+
+<script>
+    // =========================================================================
+    // KONFIGURASI APLIKASI
+    // =========================================================================
+    const MQTT_BROKER_HOST = 'psti.undiknas.ac.id';
+    const MQTT_BROKER_PORT = 443;
+    const MQTT_BROKER_PATH = '/ws';
+   
+    const NAMA_KELOMPOK = 'paprika';
+    const NAMA_AGENT_GOVARDAN = 'govardan';
+
+
+    // Topics
+    const GOVARDAN_COMMAND_TOPIC = `${NAMA_KELOMPOK}/${NAMA_AGENT_GOVARDAN}/command`;
+    const GOVARDAN_STATUS_TOPIC = `${NAMA_KELOMPOK}/${NAMA_AGENT_GOVARDAN}/status`;
+    const GADADAR_COMMAND_TOPIC = `${NAMA_KELOMPOK}/gadadar/command`;
+    const GADADAR_STATUS_TOPIC = `${NAMA_KELOMPOK}/gadadar/status`;
+    const DAMODAR_STATUS_TOPIC = `${NAMA_KELOMPOK}/damodar/status`;
+    const MURARI_STATUS_TOPIC = `${NAMA_KELOMPOK}/murari/status`;
+    const SUDARSAN_STATUS_TOPIC = `${NAMA_KELOMPOK}/sudarsan/status`;
+    // =========================================================================
+
+
+    // Data Tim
+    const team = [
+        { nim: '210010123', name: 'Govinda', agent: 'Govardan (Koordinator)' },
+        { nim: '210010124', name: 'Aditya', agent: 'Gadadar (Kontrol Blower)' },
+        { nim: '210010125', name: 'Murari', agent: 'Murari (Sensor Suhu & Kelembapan)' },
+        { nim: '210010126', name: 'Damodar', agent: 'Damodar (Sensor Level Tangki)' },
+        { nim: '210010127', name: 'Sudarsan', agent: 'Sudarsan (Sensor Cahaya)' },
+    ];
+
+
+    // Global variables
+    let mqttClient;
+    let relayStates = [false, false, false, false];
+    let blowerControl = { state: false, speed: 50, direction: 1 };
+    let connectOptions = {};
+
+
+    // DOM Elements
+    const loginPage = document.getElementById('login-page');
+    const appPage = document.getElementById('app');
+    const loginForm = document.getElementById('login-form');
+    const loginStatus = document.getElementById('login-status');
+    const connectionStatusDot = document.getElementById('connection-status-dot');
+    const connectionStatusText = document.getElementById('connection-status-text');
+    const menuToggle = document.getElementById('menu-toggle');
+    const sidebar = document.getElementById('sidebar');
+
+
+    const navMonitoring = document.getElementById('nav-monitoring');
+    const navKontrol = document.getElementById('nav-kontrol');
+    const navAbout = document.getElementById('nav-about');
+    const monitoringPage = document.getElementById('monitoring-page');
+    const kontrolPage = document.getElementById('kontrol-page');
+    const aboutPage = document.getElementById('about-page');
+
+
+    // Monitoring UI Elements
+    const luxValue = document.getElementById('lux-value');
+    const tempValue = document.getElementById('temp-value');
+    const humidValue = document.getElementById('humid-value');
+    const tankLevelValue = document.getElementById('tank-level-value');
+    const tankDistanceValue = document.getElementById('tank-distance-value');
+    const blowerSpeedValue = document.getElementById('blower-speed-value');
+    const blowerDirectionValue = document.getElementById('blower-direction-value');
+    const blowerStateValue = document.getElementById('blower-state-value');
+   
+    // Kontrol UI Elements
+    const relaySwitches = [
+        document.getElementById('relay-1-switch'),
+        document.getElementById('relay-2-switch'),
+        document.getElementById('relay-3-switch'),
+        document.getElementById('relay-4-switch')
+    ];
+    const blowerSpeedSlider = document.getElementById('blower-speed-slider');
+    const blowerSpeedLabel = document.getElementById('blower-speed-label');
+    const blowerDirectionRadios = document.getElementsByName('blower-direction');
+    const blowerStateSwitch = document.getElementById('blower-state-switch');
+
+
+
+
+    function showPage(pageToShowId) {
+        [monitoringPage, kontrolPage, aboutPage].forEach(page => {
+            page.classList.add('hidden');
+        });
+        document.getElementById(pageToShowId).classList.remove('hidden');
+
+
+        [navMonitoring, navKontrol, navAbout].forEach(nav => nav.classList.remove('bg-gray-700'));
+        if (pageToShowId === 'monitoring-page') navMonitoring.classList.add('bg-gray-700');
+        else if (pageToShowId === 'kontrol-page') navKontrol.classList.add('bg-gray-700');
+        else if (pageToShowId === 'about-page') navAbout.classList.add('bg-gray-700');
+    }
+
+
+    function updateConnectionStatus(isConnected, message) {
+        connectionStatusText.textContent = message;
+        connectionStatusDot.classList.remove('bg-green-500', 'bg-red-500', 'bg-yellow-500');
+        if (isConnected === true) connectionStatusDot.classList.add('bg-green-500');
+        else if (isConnected === false) connectionStatusDot.classList.add('bg-red-500');
+        else connectionStatusDot.classList.add('bg-yellow-500');
+    }
+
+
+    function connectMqtt(username, password) {
+        const clientId = 'WebApp_Govardan_' + new Date().getTime();
+        mqttClient = new Paho.MQTT.Client(MQTT_BROKER_HOST, Number(MQTT_BROKER_PORT), MQTT_BROKER_PATH, clientId);
+
+
+        mqttClient.onConnectionLost = onConnectionLost;
+        mqttClient.onMessageArrived = onMessageArrived;
+
+
+        connectOptions = {
+            timeout: 10,
+            userName: username,
+            password: password,
+            useSSL: true,
+            cleanSession: true,
+            onSuccess: onConnect,
+            onFailure: onFailure,
+        };
+
+
+        loginStatus.textContent = `Menghubungkan ke ${MQTT_BROKER_HOST}...`;
+        updateConnectionStatus(null, 'Menghubungkan...');
+        try {
+            mqttClient.connect(connectOptions);
+        } catch (error) {
+            loginStatus.textContent = 'Koneksi gagal: ' + error.message;
+            console.error("MQTT Connection Error: ", error);
+        }
+    }
+   
+    function onConnect() {
+        console.log("Terhubung ke MQTT Broker!");
+        loginPage.classList.add('hidden');
+        appPage.classList.remove('hidden');
+        updateConnectionStatus(true, 'Terhubung');
+
+
+        const topicsToSubscribe = [ GOVARDAN_STATUS_TOPIC, GADADAR_STATUS_TOPIC, DAMODAR_STATUS_TOPIC, MURARI_STATUS_TOPIC, SUDARSAN_STATUS_TOPIC ];
+        topicsToSubscribe.forEach(topic => {
+            console.log(`Mensubscribe ke topik: ${topic}`);
+            mqttClient.subscribe(topic);
+        });
+    }
+
+
+    function onFailure(response) {
+        console.error("Koneksi MQTT Gagal: " + response.errorMessage);
+        loginStatus.textContent = "Koneksi Gagal: " + response.errorMessage;
+        updateConnectionStatus(false, 'Gagal Terhubung');
+    }
+
+
+    function onConnectionLost(response) {
+        if (response.errorCode !== 0) {
+            console.log("Koneksi terputus: " + response.errorMessage);
+            updateConnectionStatus(false, 'Terputus, mencoba lagi...');
+            setTimeout(() => mqttClient.connect(connectOptions), 5000);
+        }
+    }
+
+
+    function onMessageArrived(message) {
+        try {
+            const topic = message.destinationName;
+            let payload;
+           
+            // Coba parsing JSON
+            try {
+                payload = JSON.parse(message.payloadString);
+            } catch(e) {
+                // Jika gagal parsing, anggap sebagai string biasa (untuk kasus relay lama)
+                payload = message.payloadString;
+            }
+
+
+            console.log(`Pesan diterima - Topik: ${topic}, Payload:`, payload);
+           
+            // Jika payload bukan object (hasil parsing JSON gagal), hentikan proses
+            if (typeof payload !== 'object' || payload === null) {
+                return;
+            }
+
+
+            switch (topic) {
+                case SUDARSAN_STATUS_TOPIC:
+                    if (payload.lux !== undefined) luxValue.textContent = parseFloat(payload.lux).toFixed(2);
+                    break;
+                case MURARI_STATUS_TOPIC:
+                    if (payload.temp !== undefined) tempValue.textContent = `${parseFloat(payload.temp).toFixed(2)} °C`;
+                    if (payload.humid !== undefined) humidValue.textContent = `${parseFloat(payload.humid).toFixed(2)} %`;
+                    break;
+                case DAMODAR_STATUS_TOPIC:
+                    if (payload.percent !== undefined) tankLevelValue.textContent = `${parseFloat(payload.percent).toFixed(2)} %`;
+                    if (payload.distance !== undefined) tankDistanceValue.textContent = `Jarak: ${parseFloat(payload.distance).toFixed(2)} cm`;
+                    break;
+                case GADADAR_STATUS_TOPIC:
+                    if (payload.speed !== undefined) blowerSpeedValue.textContent = payload.speed;
+                    if (payload.direction !== undefined) blowerDirectionValue.textContent = payload.direction ? 'Maju' : 'Mundur';
+                    if (payload.state !== undefined) blowerStateValue.textContent = payload.state ? 'ON' : 'OFF';
+                    break;
+                case GOVARDAN_STATUS_TOPIC:
+                    updateRelaySwitchUI(payload);
+                    break;
+            }
+        } catch (e) {
+            console.error("Error di onMessageArrived:", e);
+        }
+    }
+
+
+
+
+    function updateRelaySwitchUI(payload) {
+        if (payload.relay1 !== undefined) { relayStates[0] = payload.relay1; relaySwitches[0].checked = payload.relay1; }
+        if (payload.relay2 !== undefined) { relayStates[1] = payload.relay2; relaySwitches[1].checked = payload.relay2; }
+        if (payload.relay3 !== undefined) { relayStates[2] = payload.relay3; relaySwitches[2].checked = payload.relay3; }
+        if (payload.relay4 !== undefined) { relayStates[3] = payload.relay4; relaySwitches[3].checked = payload.relay4; }
+    }
+
+
+    function publishRelayCommand() {
+        if (mqttClient && mqttClient.isConnected()) {
+            const payload = { relay1: relayStates[0], relay2: relayStates[1], relay3: relayStates[2], relay4: relayStates[3] };
+            const message = new Paho.MQTT.Message(JSON.stringify(payload));
+            message.destinationName = GOVARDAN_COMMAND_TOPIC;
+            mqttClient.send(message);
+        }
+    }
+
+
+    function publishBlowerCommand() {
+        if (mqttClient && mqttClient.isConnected()) {
+            const payload = {
+                state: blowerControl.state,
+                speed: parseInt(blowerControl.speed),
+                direction: parseInt(blowerControl.direction)
+            };
+            const message = new Paho.MQTT.Message(JSON.stringify(payload));
+            message.destinationName = GADADAR_COMMAND_TOPIC;
+            mqttClient.send(message);
+            console.log(`Perintah Blower dikirim: ${JSON.stringify(payload)} ke topik ${GADADAR_COMMAND_TOPIC}`);
+        }
+    }
+   
+    function populateTeamTable() {
+        const tableBody = document.getElementById('team-data');
+        tableBody.innerHTML = ''; // Clear existing data
+        team.forEach(member => {
+            const row = document.createElement('tr');
+            row.className = 'border-b border-gray-700 hover:bg-gray-700';
+            row.innerHTML = `
+                <td class="p-3">${member.nim}</td>
+                <td class="p-3">${member.name}</td>
+                <td class="p-3">${member.agent}</td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+
+
+    // --- EVENT LISTENERS ---
+    loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        connectMqtt(document.getElementById('username').value, document.getElementById('password').value);
+    });
+
+
+    navMonitoring.addEventListener('click', (e) => { e.preventDefault(); showPage('monitoring-page'); });
+    navKontrol.addEventListener('click', (e) => { e.preventDefault(); showPage('kontrol-page'); });
+    navAbout.addEventListener('click', (e) => { e.preventDefault(); showPage('about-page'); });
+
+
+    relaySwitches.forEach((switchEl, index) => {
+        switchEl.addEventListener('change', () => {
+            relayStates[index] = switchEl.checked;
+            publishRelayCommand();
+        });
+    });
+
+
+    // Blower Control Listeners
+    blowerSpeedSlider.addEventListener('input', (e) => {
+        blowerControl.speed = e.target.value;
+        blowerSpeedLabel.textContent = e.target.value;
+    });
+    blowerSpeedSlider.addEventListener('change', publishBlowerCommand); // Publish on release
+   
+    blowerDirectionRadios.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            blowerControl.direction = e.target.value;
+            publishBlowerCommand();
+        });
+    });
+
+
+    blowerStateSwitch.addEventListener('change', (e) => {
+        blowerControl.state = e.target.checked;
+        publishBlowerCommand();
+    });
+
+
+    menuToggle.addEventListener('click', () => sidebar.classList.toggle('-translate-x-full'));
+   
+    // Initialize
+    populateTeamTable();
+
+
+</script>
+
+
+</body>
+</html> 
